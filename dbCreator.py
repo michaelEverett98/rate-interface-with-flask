@@ -26,7 +26,7 @@ print(type(datetest))
 def selectTestDB() :
 
     global mydb
-    mydb = mysql.connector.connect(host = 'localhost', user = 'root', password = '', database = 'ratedbV2')
+    mydb = mysql.connector.connect(host = 'localhost', user = 'root', password = 'HwangYeji72', database = 'ratedbV2')
     global mycursor
     mycursor = mydb.cursor(buffered = True)
     print(mycursor)
@@ -48,7 +48,33 @@ def createTestDB() :
 def createUsersTable() :
 
     # Table creation
+    # CHANGE user type to ENUM
     mycursor.execute("CREATE TABLE users (username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), user_type CHAR(5), registration_date DATE, uuid INT AUTO_INCREMENT PRIMARY KEY)")
+
+def createHostsTable() :
+    mycursor.execute("CREATE TABLE hosts (uuid INT, rate_id INT, lead_host BOOL)")
+
+# DECIDE: song IDs with a table entry for every single song? or load it all into a JSON file
+def createUserScoresTable() :
+    # mycursor.execute("CREATE TABLE user_scores (rate_id INT PRIMARY KEY, uuid INT, scores JSON, comments JSON)")
+    mycursor.execute("CREATE TABLE user_scores (song_id INT PRIMARY KEY, uuid INT, scores DECIMAL(3, 1), comments VARCHAR)")
+
+def createRatesTable() :
+
+    # change rateimage to some kind of binary type to internally store image rather than a varchar link
+    # songlist JSON?
+    mycursor.execute("CREATE TABLE rates (rate_id INT PRIMARY KEY, rate_name VARCHAR(510), rate_image VARCHAR, start_date DATE, reveal_date DATE)")
+
+def createSongsTable() :
+
+    # JSON file for artist features?
+    mycursor.execute("CREATE TABLE songs (song_id INT AUTO_INCREMENT PRIMARY KEY, song_name VARCHAR(510), artist_id INT, rate_id INT, bonus BOOL, placement INT(3), average DECIMAL (4, 3), controversy(4, 3))")
+
+def createArtistsTable() :
+
+    # company to ENUM?
+    # gender to ENUM?
+    mycursor.execute("CREATE TABLE artists (artist_id INT AUTO_INCREMENT PRIMARY KEY, artist_name VARCHAR(255), company VARCHAR, list_of_rates JSON, group BOOL, gender CHAR(1))")
 
 # ==================================================
 #               Entry creators
@@ -59,7 +85,7 @@ def insertUser() :
     username = str(input("Enter a username: "))
     password = str(input("Enter a password: "))
     email = str(input("Enter your email: "))
-    userType = "rater"
+    userType = "rater" # use ENUM data type??
     registrationDate = datetest
 
     # Populate table with dummy entries
@@ -73,11 +99,11 @@ def insertUser() :
     mycursor.executemany(sql, val)
     mydb.commit()
 
-    print("User inserted")
+    '''print("User inserted")
     mycursor.execute(f"SELECT * FROM users")
     for x in mycursor :
         print(x)
-        print(type(x[4]))
+        print(type(x[4]))'''
 
 
 # ==================================================
