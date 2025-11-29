@@ -18,6 +18,25 @@ print(datetest)
 print(type(datetest))
 # %H:%M:%S
 
+#menuType = []
+
+# ==================================================
+#               Miscellanous functions
+# ==================================================
+
+# Iterates through an array of menu options
+def menuIterator(menuOptions) :
+
+    for i in range(len(menuOptions)) :
+
+        print(i, menuOptions[i])
+
+    return
+
+# Simple but necessary for storing functions in array
+def printExit() :
+
+    print("Exit")
 
 # ==================================================
 #               Menu options
@@ -29,17 +48,20 @@ def selectTestDB() :
     mydb = mysql.connector.connect(host = 'localhost', user = 'root', password = 'HwangYeji72', database = 'ratedbV2')
     global mycursor
     mycursor = mydb.cursor(buffered = True)
-    print(mycursor)
-    print(type(mycursor))
+    #print(mycursor)
+    #print(type(mycursor))
+    print("Test rate selected, choose action")
     #return mycursor
 
 def deleteTestDB() :
 
     mycursor.execute("DROP DATABASE ratedbV2")
+    print("Test database deleted")
 
 def createTestDB() :
 
     mycursor.execute("CREATE DATABASE ratedbV2")
+    print("New test database created")
 
 # ==================================================
 #               Tables Creator
@@ -50,31 +72,37 @@ def createUsersTable() :
     # Table creation
     # CHANGE user type to ENUM
     mycursor.execute("CREATE TABLE users (username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), user_type CHAR(5), registration_date DATE, uuid INT AUTO_INCREMENT PRIMARY KEY)")
+    print("Users table created")
 
 def createHostsTable() :
     mycursor.execute("CREATE TABLE hosts (uuid INT, rate_id INT, lead_host BOOL)")
+    print("Hosts table created")
 
 # DECIDE: song IDs with a table entry for every single song? or load it all into a JSON file
 def createUserScoresTable() :
     # mycursor.execute("CREATE TABLE user_scores (rate_id INT PRIMARY KEY, uuid INT, scores JSON, comments JSON)")
-    mycursor.execute("CREATE TABLE user_scores (song_id INT PRIMARY KEY, uuid INT, scores DECIMAL(3, 1), comments VARCHAR)")
+    mycursor.execute("CREATE TABLE user_scores (song_id INT PRIMARY KEY, uuid INT, scores DECIMAL(3, 1), comments VARCHAR(255))")
+    print("User scores table created")
 
 def createRatesTable() :
 
     # change rateimage to some kind of binary type to internally store image rather than a varchar link
     # songlist JSON?
-    mycursor.execute("CREATE TABLE rates (rate_id INT PRIMARY KEY, rate_name VARCHAR(510), rate_image VARCHAR, start_date DATE, reveal_date DATE)")
+    mycursor.execute("CREATE TABLE rates (rate_id INT PRIMARY KEY, rate_name VARCHAR(510), rate_image VARCHAR(255), start_date DATE, reveal_date DATE)")
+    print("Rates table created")
 
 def createSongsTable() :
 
     # JSON file for artist features?
-    mycursor.execute("CREATE TABLE songs (song_id INT AUTO_INCREMENT PRIMARY KEY, song_name VARCHAR(510), artist_id INT, rate_id INT, bonus BOOL, placement INT(3), average DECIMAL (4, 3), controversy(4, 3))")
+    mycursor.execute("CREATE TABLE songs (song_id INT AUTO_INCREMENT PRIMARY KEY, song_name VARCHAR(510), artist_id INT, rate_id INT, bonus BOOLEAN, placement INT(3), average DECIMAL (4, 3), controversy DECIMAL (4, 3))")
+    print("Songs table created")
 
 def createArtistsTable() :
 
     # company to ENUM?
     # gender to ENUM?
-    mycursor.execute("CREATE TABLE artists (artist_id INT AUTO_INCREMENT PRIMARY KEY, artist_name VARCHAR(255), company VARCHAR, list_of_rates JSON, group BOOL, gender CHAR(1))")
+    mycursor.execute("CREATE TABLE artists (artist_id INT AUTO_INCREMENT PRIMARY KEY, artist_name VARCHAR(255), company VARCHAR(255), list_of_rates VARCHAR(255), soloist BOOLEAN, gender CHAR(1))")#, group BOOLEAN, gender CHAR(1))")
+    print("Artists table created")
 
 # ==================================================
 #               Entry creators
@@ -99,11 +127,24 @@ def insertUser() :
     mycursor.executemany(sql, val)
     mydb.commit()
 
-    '''print("User inserted")
-    mycursor.execute(f"SELECT * FROM users")
+    print("New user inserted")
+
+    '''mycursor.execute(f"SELECT * FROM users")
     for x in mycursor :
         print(x)
         print(type(x[4]))'''
+    
+# ==================================================
+#               Table Creation Menu
+# ==================================================
+
+createTablesList = ["Return", "Create users table", "Create hosts table", "Create user scores table", "Create rates table", "Create songs table", "Create artists table"]
+
+#createTableFunctions = [manageFunction, createUsersTable, createHostsTable, createUserScoresTable, createRatesTable, createSongsTable, createArtistsTable]
+
+def showTablesMenu() :
+
+    manageFunction(createTablesList, createTableFunctions)
 
 
 # ==================================================
@@ -112,46 +153,51 @@ def insertUser() :
 
 # def tablesMenu() :
 
-dbOptions = ()
-dbFunctions = ["Exit", "Create test DB", "Delete test DB", "Select test DB", "Create users table", "Insert user"]
+#menuOptionSelector = () # do I need this?
+dbFunctions = ["Exit", "Create test DB", "Delete test DB", "Select test DB", "Open table creation menu", "Insert user"]
 
-def dbManage() :
-    for i in range(len(dbFunctions)) :
-        print(i, dbFunctions[i])
-    return
+# DONE: Create a function that iterates through all the menu functions? i.e. instead of making new function for each menu, create array with functions list
 
-def manageFunction() :
+def manageFunction(menuType, menuFunctionsArray) :
 
-    dbOptions = ()
+    menuOptionSelector = ()
 
-    while dbOptions != 0 :
+    while menuOptionSelector != 0 :
 
-        dbManage()
-        dbOptions = int(input(f"{30 * "-"}\nChoose option: "))
-        #print(mycursor)
+        menuIterator(menuType) # menuType is the array containing the menu option strings
+        menuOptionSelector = int(input(f"{30 * "-"}\nChoose option: "))
 
-        if dbOptions == 0 :
-            print("Exit")
+        if menuOptionSelector in range(len(menuType)) :
 
-        elif dbOptions == 1 :
-            createTestDB()
+            #if menuOptionSelector == 0 :
 
-        elif dbOptions == 2 :
-            deleteTestDB()
+                #menuFunctionsArray[menuOptionSelector]("Exit")
 
-        elif dbOptions == 3 :
-            selectTestDB()
+            #else :
 
-        elif dbOptions == 4 :
-         #   tablesMenu()
-            createUsersTable()
-
-        elif dbOptions == 5 :
-            insertUser()
-
+                menuFunctionsArray[menuOptionSelector]()
+        
         else :
-            dbOptions = int(input(f"{30 * "-"}\nPlease select a valid option: "))
+            print("Error")
 
-    dbOptions = ()
+# ==================================================
+#               Menus
+# ==================================================
 
-manageFunction()
+def mainMenu() :
+
+    manageFunction(dbFunctions, initialMenuFunctions)
+
+# ==================================================
+#               Menu function arrays
+# ==================================================
+
+createTableFunctions = [mainMenu, createUsersTable, createHostsTable, createUserScoresTable, createRatesTable, createSongsTable, createArtistsTable]
+
+initialMenuFunctions = [printExit, createTestDB, deleteTestDB, selectTestDB, showTablesMenu, insertUser]
+
+# ==================================================
+#               INITIAL MENU BOOTUP
+# ==================================================
+
+mainMenu()
